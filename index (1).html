@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar QR Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- Google Analytics 4 - Replace GA_MEASUREMENT_ID with your ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'GA_MEASUREMENT_ID');
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-areas:
+        ".    top    ."
+        "left center right"
+        ".    bottom .";
+      grid-template-columns: 160px auto 160px;
+      grid-template-rows: 90px auto 90px;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    /* Ad Slots */
+    .ad-slot {
+      background: #e2e8f0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ad-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ad-label {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      z-index: 1;
+    }
+
+    .ad-top {
+      grid-area: top;
+      height: 90px;
+    }
+
+    .ad-bottom {
+      grid-area: bottom;
+      height: 90px;
+    }
+
+    .ad-left {
+      grid-area: left;
+      width: 160px;
+    }
+
+    .ad-right {
+      grid-area: right;
+      width: 160px;
+    }
+
+    /* Center Content */
+    .center {
+      grid-area: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+      min-width: 350px;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.375rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.875rem;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .btn:hover {
+      background: #4338ca;
+    }
+
+    #qr-container {
+      margin-top: 1.5rem;
+      text-align: center;
+      display: none;
+    }
+
+    #qr-code {
+      display: inline-block;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .scan-text {
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .layout {
+        grid-template-areas:
+          "top"
+          "center"
+          "bottom";
+        grid-template-columns: 1fr;
+        grid-template-rows: 70px auto 70px;
+        max-width: 400px;
+      }
+
+      .ad-left, .ad-right {
+        display: none;
+      }
+
+      .ad-top, .ad-bottom {
+        width: 100%;
+        height: 70px;
+      }
+
+      .card {
+        min-width: unset;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Top Banner Ad -->
+    <div class="ad-slot ad-top" id="ad-top">
+      <span class="ad-label">Ad</span>
+      <img src="" alt="Advertisement" id="ad-top-img">
+    </div>
+
+    <!-- Left Sidebar Ad -->
+    <div class="ad-slot ad-left" id="ad-left">
+      <span class="ad-label">Ad</span>
+      <img src="" alt="Advertisement" id="ad-left-img">
+    </div>
+
+    <!-- Main Content -->
+    <div class="center">
+      <div class="card">
+        <h1>Calendar QR Generator</h1>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-date">Date</label>
+            <input type="date" id="event-date">
+          </div>
+          <div class="form-group">
+            <label for="event-time">Time</label>
+            <input type="time" id="event-time">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-note">Note</label>
+          <textarea id="event-note" rows="3" placeholder="Event description"></textarea>
+        </div>
+
+        <button class="btn" id="generate-btn">Generate QR Code</button>
+
+        <div id="qr-container">
+          <div id="qr-code"></div>
+          <p class="scan-text">Scan to add to calendar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar Ad -->
+    <div class="ad-slot ad-right" id="ad-right">
+      <span class="ad-label">Ad</span>
+      <img src="" alt="Advertisement" id="ad-right-img">
+    </div>
+
+    <!-- Bottom Banner Ad -->
+    <div class="ad-slot ad-bottom" id="ad-bottom">
+      <span class="ad-label">Ad</span>
+      <img src="" alt="Advertisement" id="ad-bottom-img">
+    </div>
+  </div>
+
+  <script>
+    // =====================
+    // AD CONFIGURATION
+    // =====================
+    const adInventory = {
+      a: { name: 'Ad A - Rose', img: 'https://images.unsplash.com/photo-1518882605630-8eb5f0ed6bfc?w=400&h=300&fit=crop' },
+      b: { name: 'Ad B - Tulip', img: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=400&h=300&fit=crop' },
+      c: { name: 'Ad C - Sunflower', img: 'https://images.unsplash.com/photo-1551731409-43eb3e517a1a?w=400&h=300&fit=crop' },
+      d: { name: 'Ad D - Daisy', img: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=300&fit=crop' },
+      e: { name: 'Ad E - Lavender', img: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?w=400&h=300&fit=crop' },
+      f: { name: 'Ad F - Orchid', img: 'https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=400&h=300&fit=crop' },
+      g: { name: 'Ad G - Peony', img: 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=400&h=300&fit=crop' },
+      h: { name: 'Ad H - Lily', img: 'https://images.unsplash.com/photo-1470509037663-253afd7f0f51?w=400&h=300&fit=crop' },
+      i: { name: 'Ad I - Hydrangea', img: 'https://images.unsplash.com/photo-1468327768560-75b778cbb551?w=400&h=300&fit=crop' },
+      j: { name: 'Ad J - Carnation', img: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=400&h=300&fit=crop' },
+      k: { name: 'Ad K - Iris', img: 'https://images.unsplash.com/photo-1590164996125-278fa05ab24c?w=400&h=300&fit=crop' },
+      l: { name: 'Ad L - Poppy', img: 'https://images.unsplash.com/photo-1560717799-5090c6cfa279?w=400&h=300&fit=crop' },
+      m: { name: 'Ad M - Magnolia', img: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&h=300&fit=crop' },
+      n: { name: 'Ad N - Cherry Blossom', img: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&h=300&fit=crop' },
+      o: { name: 'Ad O - Dahlia', img: 'https://images.unsplash.com/photo-1510756516769-e7f31e54d847?w=400&h=300&fit=crop' },
+      p: { name: 'Ad P - Marigold', img: 'https://images.unsplash.com/photo-1582794543662-11a355726d9f?w=400&h=300&fit=crop' }
+    };
+
+    // Current ad assignments
+    const adSlots = {
+      top: 'a',
+      left: 'b',
+      right: 'c',
+      bottom: 'd'
+    };
+
+    // =====================
+    // IMPRESSION TRACKING
+    // =====================
+    const impressions = {};
+
+    function trackImpression(slot, adId) {
+      const ad = adInventory[adId];
+      if (!ad) return;
+
+      if (!impressions[adId]) {
+        impressions[adId] = { count: 0, name: ad.name };
+      }
+      impressions[adId].count++;
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'ad_impression', {
+          'ad_slot': slot,
+          'ad_id': adId,
+          'ad_name': ad.name
+        });
+      }
+
+      console.log(`[Impression] Slot: ${slot}, Ad: ${adId} (${ad.name}), Total: ${impressions[adId].count}`);
+    }
+
+    function loadAds() {
+      document.getElementById('ad-top-img').src = adInventory[adSlots.top].img;
+      trackImpression('top', adSlots.top);
+
+      document.getElementById('ad-left-img').src = adInventory[adSlots.left].img;
+      trackImpression('left', adSlots.left);
+
+      document.getElementById('ad-right-img').src = adInventory[adSlots.right].img;
+      trackImpression('right', adSlots.right);
+
+      document.getElementById('ad-bottom-img').src = adInventory[adSlots.bottom].img;
+      trackImpression('bottom', adSlots.bottom);
+    }
+
+    window.getImpressionStats = function() {
+      console.table(impressions);
+      return impressions;
+    };
+
+    window.changeAd = function(slot, adId) {
+      if (!adInventory[adId]) {
+        console.error(`Ad "${adId}" not found. Available: a-p`);
+        return;
+      }
+      adSlots[slot] = adId;
+      document.getElementById(`ad-${slot}-img`).src = adInventory[adId].img;
+      trackImpression(slot, adId);
+      console.log(`Changed ${slot} to ad ${adId}`);
+    };
+
+    // =====================
+    // QR CODE GENERATOR
+    // =====================
+    let qrCode = null;
+
+    document.getElementById('generate-btn').addEventListener('click', function() {
+      const date = document.getElementById('event-date').value;
+      const time = document.getElementById('event-time').value;
+      const note = document.getElementById('event-note').value.trim();
+
+      if (!date || !time) {
+        alert('Please enter date and time');
+        return;
+      }
+
+      const startDate = new Date(`${date}T${time}`);
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+
+      const formatDate = (d) => {
+        return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      };
+
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'BEGIN:VEVENT',
+        `DTSTART:${formatDate(startDate)}`,
+        `DTEND:${formatDate(endDate)}`,
+        `SUMMARY:${note || 'Event'}`,
+        `DESCRIPTION:${note || ''}`,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\n');
+
+      const qrContainer = document.getElementById('qr-code');
+      qrContainer.innerHTML = '';
+
+      qrCode = new QRCode(qrContainer, {
+        text: icsContent,
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      document.getElementById('qr-container').style.display = 'block';
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'qr_generated', {
+          'event_date': date,
+          'event_time': time
+        });
+      }
+    });
+
+    loadAds();
+  </script>
+</body>
+</html>
