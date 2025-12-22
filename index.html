@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event Check-In System</title>
+  <title>Calendar QR Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -12,165 +13,34 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
       min-height: 100vh;
       padding: 2rem;
-      color: #1e293b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .container {
-      max-width: 900px;
-      margin: 0 auto;
+      max-width: 400px;
+      width: 100%;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
     }
 
     h1 {
-      font-size: 1.875rem;
-      color: #1e293b;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    h1 svg {
-      color: #4f46e5;
-    }
-
-    .subtitle {
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.625rem 1rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: #4f46e5;
-      color: white;
-      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-    }
-
-    .btn-primary:hover {
-      background: #4338ca;
-    }
-
-    .btn-success {
-      background: #16a34a;
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #15803d;
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .btn-secondary:hover {
-      background: #e2e8f0;
-    }
-
-    .btn:disabled {
-      background: #e2e8f0;
-      color: #94a3b8;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background: #b91c1c;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      padding: 1rem;
-      z-index: 100;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      max-width: 500px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    .modal-header h2 {
       font-size: 1.25rem;
       color: #1e293b;
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
 
-    .modal-close {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      padding: 0.25rem;
-    }
-
-    .modal-close:hover {
-      color: #475569;
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1.5rem;
-      border-top: 1px solid #f1f5f9;
-    }
-
-    /* Form */
     .form-group {
       margin-bottom: 1rem;
     }
@@ -184,18 +54,15 @@
     }
 
     .form-group input,
-    .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 0.625rem 0.75rem;
+      padding: 0.75rem;
       border: 1px solid #e2e8f0;
       border-radius: 0.5rem;
-      font-size: 0.875rem;
-      transition: all 0.2s;
+      font-size: 1rem;
     }
 
     .form-group input:focus,
-    .form-group select:focus,
     .form-group textarea:focus {
       outline: none;
       border-color: #4f46e5;
@@ -208,1023 +75,123 @@
       gap: 1rem;
     }
 
-    .recurrence-options {
-      background: #f8fafc;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    .weekday-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    .weekday-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem 0.75rem;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .weekday-btn:has(input:checked) {
+    .btn {
+      width: 100%;
+      padding: 0.875rem;
       background: #4f46e5;
       color: white;
-      border-color: #4f46e5;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
     }
 
-    .weekday-btn input {
+    .btn:hover {
+      background: #4338ca;
+    }
+
+    #qr-container {
+      margin-top: 1.5rem;
+      text-align: center;
       display: none;
     }
 
-    .recurrence-preview {
-      font-size: 0.875rem;
-      color: #4f46e5;
-      margin-top: 0.75rem;
-      padding: 0.5rem;
-      background: white;
-      border-radius: 0.375rem;
-      border-left: 3px solid #4f46e5;
-    }
-
-    /* Check-in mode toggle */
-    .checkin-toggle {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .checkin-toggle button {
-      flex: 1;
-      padding: 0.75rem;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .checkin-toggle button.active {
-      background: #4f46e5;
-      color: white;
-    }
-
-    .checkin-toggle button:hover:not(.active) {
-      background: #e2e8f0;
-    }
-
-    .anonymous-note {
-      background: #f8fafc;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      color: #64748b;
-    }
-
-    /* Events */
-    .section-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .section-title svg {
-      color: #4f46e5;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .empty-state svg {
-      width: 4rem;
-      height: 4rem;
-      color: #cbd5e1;
-      margin-bottom: 1rem;
-    }
-
-    .empty-state h3 {
-      color: #475569;
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-      color: #94a3b8;
-    }
-
-    .events-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .event-card {
-      background: white;
-      border-radius: 0.75rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      border: 1px solid #f1f5f9;
-      overflow: hidden;
-    }
-
-    .event-card-body {
-      padding: 1.25rem;
-    }
-
-    .event-main {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .event-info h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .event-datetime {
-      font-size: 0.875rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
-
-    .event-recurrence {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.75rem;
-      color: #4f46e5;
-      margin-top: 0.25rem;
-    }
-
-    .event-actions {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .event-capacity {
-      text-align: right;
-    }
-
-    .capacity-count {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .capacity-count svg {
-      color: #94a3b8;
-    }
-
-    .status-badge {
+    #qr-code {
       display: inline-block;
-      font-size: 0.75rem;
-      padding: 0.125rem 0.5rem;
-      border-radius: 9999px;
-      margin-top: 0.25rem;
-    }
-
-    .status-full {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .status-ready {
-      background: #dcfce7;
-      color: #15803d;
-    }
-
-    .status-need-more {
-      background: #fef9c3;
-      color: #a16207;
-    }
-
-    .attendees {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #f1f5f9;
-    }
-
-    .attendees-label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
-    }
-
-    .attendees-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .attendee-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.375rem 0.75rem;
-      background: #f1f5f9;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      color: #475569;
-    }
-
-    .attendee-tag svg {
-      width: 0.875rem;
-      height: 0.875rem;
-    }
-
-    .attendee-remove {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      padding: 0;
-      margin-left: 0.25rem;
-      display: flex;
-    }
-
-    .attendee-remove:hover {
-      color: #ef4444;
-    }
-
-    .past-events {
-      margin-top: 2rem;
-      opacity: 0.6;
-    }
-
-    .past-events .section-title {
-      color: #64748b;
-    }
-
-    .past-event-card {
-      background: white;
-      border-radius: 0.75rem;
       padding: 1rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .past-event-info h3 {
-      font-weight: 500;
-      color: #475569;
-    }
-
-    .past-event-info p {
+    .scan-text {
+      margin-top: 0.75rem;
       font-size: 0.875rem;
-      color: #94a3b8;
-    }
-
-    .past-event-attendance {
       color: #64748b;
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 1rem;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .event-main {
-        flex-direction: column;
-      }
-
-      .event-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <div>
-        <h1>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          Event Check-In
-        </h1>
-        <p class="subtitle">Create recurring events and track attendance</p>
-      </div>
-      <div style="display: flex; gap: 0.5rem;">
-        <button class="btn btn-primary" onclick="openCreateModal()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          New Event
-        </button>
-        <button class="btn btn-danger" onclick="resetAllData()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-          Done
-        </button>
-      </div>
-    </header>
+    <div class="card">
+      <h1>Calendar QR Generator</h1>
 
-    <main id="events-container">
-      <!-- Events will be rendered here -->
-    </main>
-  </div>
-
-  <!-- Create Event Modal -->
-  <div class="modal-overlay" id="create-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Create New Event</h2>
-        <button class="modal-close" onclick="closeCreateModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
+      <div class="form-row">
         <div class="form-group">
-          <label for="event-name">Event Name</label>
-          <input type="text" id="event-name" placeholder="Team Standup">
+          <label for="event-date">Date</label>
+          <input type="date" id="event-date">
         </div>
         <div class="form-group">
-          <label for="event-description">Description (optional)</label>
-          <textarea id="event-description" rows="2" placeholder="Brief description of the event"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="event-date">Start Date</label>
-            <input type="date" id="event-date">
-          </div>
-          <div class="form-group">
-            <label for="event-time">Start Time</label>
-            <input type="time" id="event-time">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="event-duration">Duration (minutes)</label>
-          <input type="number" id="event-duration" value="60" min="15" step="15">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="event-min">Min Participants</label>
-            <input type="number" id="event-min" value="1" min="1">
-          </div>
-          <div class="form-group">
-            <label for="event-max">Max Participants</label>
-            <input type="number" id="event-max" value="10" min="1">
-          </div>
-        </div>
-        <div class="form-group" style="border-top: 1px solid #f1f5f9; padding-top: 1rem;">
-          <label for="event-recurrence">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 0.25rem;">
-              <polyline points="17 1 21 5 17 9"></polyline>
-              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-              <polyline points="7 23 3 19 7 15"></polyline>
-              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-            </svg>
-            Recurrence
-          </label>
-          <select id="event-recurrence" onchange="toggleRecurrenceOptions()">
-            <option value="none">No recurrence (single event)</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Every 2 weeks</option>
-            <option value="monthly">Monthly</option>
-            <option value="weekdays">Weekdays only (Mon-Fri)</option>
-            <option value="custom">Custom interval</option>
-          </select>
-        </div>
-        <div class="recurrence-options" id="recurrence-options" style="display: none;">
-          <div class="form-row" id="custom-interval-row" style="display: none;">
-            <div class="form-group">
-              <label for="event-interval">Repeat every</label>
-              <input type="number" id="event-interval" value="1" min="1">
-            </div>
-            <div class="form-group">
-              <label for="interval-unit">Interval unit</label>
-              <select id="interval-unit">
-                <option value="days">Days</option>
-                <option value="weeks">Weeks</option>
-                <option value="months">Months</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group" id="weekday-select" style="display: none;">
-            <label>Repeat on these days</label>
-            <div class="weekday-buttons">
-              <label class="weekday-btn"><input type="checkbox" value="0"> Sun</label>
-              <label class="weekday-btn"><input type="checkbox" value="1" checked> Mon</label>
-              <label class="weekday-btn"><input type="checkbox" value="2" checked> Tue</label>
-              <label class="weekday-btn"><input type="checkbox" value="3" checked> Wed</label>
-              <label class="weekday-btn"><input type="checkbox" value="4" checked> Thu</label>
-              <label class="weekday-btn"><input type="checkbox" value="5" checked> Fri</label>
-              <label class="weekday-btn"><input type="checkbox" value="6"> Sat</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="event-count">Number of occurrences</label>
-            <input type="number" id="event-count" value="4" min="1" max="52">
-          </div>
-          <p class="recurrence-preview" id="recurrence-preview"></p>
+          <label for="event-time">Time</label>
+          <input type="time" id="event-time">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="createEvent()">Create Event</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Check-In Modal -->
-  <div class="modal-overlay" id="checkin-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <div>
-          <h2>Check In</h2>
-          <p class="subtitle" id="checkin-event-name"></p>
-        </div>
-        <button class="modal-close" onclick="closeCheckinModal()">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+      <div class="form-group">
+        <label for="event-note">Note</label>
+        <textarea id="event-note" rows="3" placeholder="Event description"></textarea>
       </div>
-      <div class="modal-body">
-        <div class="checkin-toggle">
-          <button id="toggle-named" class="active" onclick="setCheckinMode('named')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            By Name
-          </button>
-          <button id="toggle-anonymous" onclick="setCheckinMode('anonymous')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <line x1="18" y1="8" x2="23" y2="13"></line>
-              <line x1="23" y1="8" x2="18" y2="13"></line>
-            </svg>
-            Anonymous
-          </button>
-        </div>
-        <div id="named-input" class="form-group">
-          <label for="checkin-name">Your Name</label>
-          <input type="text" id="checkin-name" placeholder="Enter your name">
-        </div>
-        <div id="anonymous-note" class="anonymous-note" style="display: none;">
-          You'll be checked in anonymously. You can only check in once per event.
-        </div>
-        <button class="btn btn-success" style="width: 100%; margin-top: 1rem;" onclick="confirmCheckin()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          Confirm Check-In
-        </button>
+
+      <button class="btn" id="generate-btn">Generate QR Code</button>
+
+      <div id="qr-container">
+        <div id="qr-code"></div>
+        <p class="scan-text">Scan to add to calendar</p>
       </div>
     </div>
   </div>
 
   <script>
-    // State
-    let events = [];
-    let currentCheckinEventId = null;
-    let checkinMode = 'named';
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    let qrCode = null;
 
-    // Load events from localStorage
-    function loadEvents() {
-      const saved = localStorage.getItem('eventCheckinEvents');
-      if (saved) {
-        events = JSON.parse(saved).map(e => ({
-          ...e,
-          dateTime: new Date(e.dateTime)
-        }));
-      }
-      renderEvents();
-    }
+    document.getElementById('generate-btn').addEventListener('click', function() {
+      const date = document.getElementById('event-date').value;
+      const time = document.getElementById('event-time').value;
+      const note = document.getElementById('event-note').value.trim();
 
-    // Save events to localStorage
-    function saveEvents() {
-      localStorage.setItem('eventCheckinEvents', JSON.stringify(events));
-    }
-
-    // Modal functions
-    function openCreateModal() {
-      document.getElementById('create-modal').classList.add('active');
-    }
-
-    function closeCreateModal() {
-      document.getElementById('create-modal').classList.remove('active');
-      resetCreateForm();
-    }
-
-    function openCheckinModal(eventId) {
-      currentCheckinEventId = eventId;
-      const event = events.find(e => e.id === eventId);
-      document.getElementById('checkin-event-name').textContent = event.name;
-      document.getElementById('checkin-modal').classList.add('active');
-      setCheckinMode('named');
-      document.getElementById('checkin-name').value = '';
-    }
-
-    function closeCheckinModal() {
-      document.getElementById('checkin-modal').classList.remove('active');
-      currentCheckinEventId = null;
-    }
-
-    function setCheckinMode(mode) {
-      checkinMode = mode;
-      document.getElementById('toggle-named').classList.toggle('active', mode === 'named');
-      document.getElementById('toggle-anonymous').classList.toggle('active', mode === 'anonymous');
-      document.getElementById('named-input').style.display = mode === 'named' ? 'block' : 'none';
-      document.getElementById('anonymous-note').style.display = mode === 'anonymous' ? 'block' : 'none';
-    }
-
-    function toggleRecurrenceOptions() {
-      const recurrence = document.getElementById('event-recurrence').value;
-      const optionsDiv = document.getElementById('recurrence-options');
-      const customRow = document.getElementById('custom-interval-row');
-      const weekdaySelect = document.getElementById('weekday-select');
-      
-      if (recurrence === 'none') {
-        optionsDiv.style.display = 'none';
-      } else {
-        optionsDiv.style.display = 'block';
-        customRow.style.display = recurrence === 'custom' ? 'grid' : 'none';
-        weekdaySelect.style.display = recurrence === 'weekdays' ? 'block' : 'none';
-      }
-      updateRecurrencePreview();
-    }
-
-    function updateRecurrencePreview() {
-      const recurrence = document.getElementById('event-recurrence').value;
-      const count = document.getElementById('event-count').value;
-      const preview = document.getElementById('recurrence-preview');
-      
-      if (recurrence === 'none' || !preview) return;
-      
-      let text = '';
-      switch (recurrence) {
-        case 'daily':
-          text = `Repeats every day for ${count} occurrences`;
-          break;
-        case 'weekly':
-          text = `Repeats every week for ${count} occurrences`;
-          break;
-        case 'biweekly':
-          text = `Repeats every 2 weeks for ${count} occurrences`;
-          break;
-        case 'monthly':
-          text = `Repeats every month for ${count} occurrences`;
-          break;
-        case 'weekdays':
-          const days = getSelectedWeekdays().map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]);
-          text = `Repeats on ${days.join(', ')} for ${count} occurrences`;
-          break;
-        case 'custom':
-          const interval = document.getElementById('event-interval').value;
-          const unit = document.getElementById('interval-unit').value;
-          text = `Repeats every ${interval} ${unit} for ${count} occurrences`;
-          break;
-      }
-      preview.textContent = text;
-    }
-
-    function getSelectedWeekdays() {
-      const checkboxes = document.querySelectorAll('#weekday-select input[type="checkbox"]:checked');
-      return Array.from(checkboxes).map(cb => parseInt(cb.value));
-    }
-
-    function resetAllData() {
-      if (confirm('Are you sure you want to reset all data? This will delete all events and check-ins.')) {
-        events = [];
-        localStorage.removeItem('eventCheckinEvents');
-        renderEvents();
-      }
-    }
-
-    function resetCreateForm() {
-      document.getElementById('event-name').value = '';
-      document.getElementById('event-description').value = '';
-      document.getElementById('event-date').value = '';
-      document.getElementById('event-time').value = '';
-      document.getElementById('event-duration').value = '60';
-      document.getElementById('event-min').value = '1';
-      document.getElementById('event-max').value = '10';
-      document.getElementById('event-recurrence').value = 'none';
-      document.getElementById('event-interval').value = '1';
-      document.getElementById('event-count').value = '4';
-      document.getElementById('interval-unit').value = 'days';
-      document.getElementById('recurrence-options').style.display = 'none';
-      document.getElementById('custom-interval-row').style.display = 'none';
-      document.getElementById('weekday-select').style.display = 'none';
-      
-      // Reset weekday checkboxes to weekdays only
-      document.querySelectorAll('#weekday-select input[type="checkbox"]').forEach(cb => {
-        cb.checked = [1, 2, 3, 4, 5].includes(parseInt(cb.value));
-      });
-    }
-
-    // Create event
-    function createEvent() {
-      const name = document.getElementById('event-name').value.trim();
-      const description = document.getElementById('event-description').value.trim();
-      const startDate = document.getElementById('event-date').value;
-      const startTime = document.getElementById('event-time').value;
-      const duration = parseInt(document.getElementById('event-duration').value) || 60;
-      const minParticipants = parseInt(document.getElementById('event-min').value) || 1;
-      const maxParticipants = parseInt(document.getElementById('event-max').value) || 10;
-      const recurrenceType = document.getElementById('event-recurrence').value;
-      const recurrenceInterval = parseInt(document.getElementById('event-interval').value) || 1;
-      const recurrenceCount = parseInt(document.getElementById('event-count').value) || 4;
-      const intervalUnit = document.getElementById('interval-unit').value;
-      const selectedWeekdays = getSelectedWeekdays();
-
-      if (!name || !startDate || !startTime) {
-        alert('Please fill in event name, date, and time');
+      if (!date || !time) {
+        alert('Please enter date and time');
         return;
       }
 
-      const templateId = `event_${Date.now()}`;
-      const instances = generateEventInstances({
-        id: templateId,
-        name,
-        description,
-        startDate,
-        startTime,
-        duration,
-        minParticipants,
-        maxParticipants,
-        recurrenceType,
-        recurrenceInterval,
-        recurrenceCount,
-        intervalUnit,
-        selectedWeekdays
-      });
+      // Create calendar event string (iCalendar format)
+      const startDate = new Date(`${date}T${time}`);
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
 
-      events = [...events, ...instances].sort((a, b) => a.dateTime - b.dateTime);
-      saveEvents();
-      renderEvents();
-      closeCreateModal();
-    }
-
-    function generateEventInstances(template) {
-      const instances = [];
-      const startDateTime = new Date(`${template.startDate}T${template.startTime}`);
-      const count = template.recurrenceType === 'none' ? 1 : template.recurrenceCount;
-
-      if (template.recurrenceType === 'weekdays') {
-        // Generate events for selected weekdays
-        const selectedDays = template.selectedWeekdays || [1, 2, 3, 4, 5];
-        let currentDate = new Date(startDateTime);
-        let generated = 0;
-        let maxIterations = count * 10; // Safety limit
-        
-        while (generated < count && maxIterations > 0) {
-          if (selectedDays.includes(currentDate.getDay())) {
-            instances.push({
-              id: `${template.id}_${generated}`,
-              templateId: template.id,
-              name: template.name,
-              description: template.description,
-              dateTime: new Date(currentDate),
-              duration: template.duration,
-              minParticipants: template.minParticipants,
-              maxParticipants: template.maxParticipants,
-              checkIns: [],
-              recurrenceInfo: `${generated + 1} of ${count}`
-            });
-            generated++;
-          }
-          currentDate.setDate(currentDate.getDate() + 1);
-          maxIterations--;
-        }
-      } else {
-        for (let i = 0; i < count; i++) {
-          const instanceDate = new Date(startDateTime);
-
-          switch (template.recurrenceType) {
-            case 'daily':
-              instanceDate.setDate(instanceDate.getDate() + i);
-              break;
-            case 'weekly':
-              instanceDate.setDate(instanceDate.getDate() + (i * 7));
-              break;
-            case 'biweekly':
-              instanceDate.setDate(instanceDate.getDate() + (i * 14));
-              break;
-            case 'monthly':
-              instanceDate.setMonth(instanceDate.getMonth() + i);
-              break;
-            case 'custom':
-              switch (template.intervalUnit) {
-                case 'days':
-                  instanceDate.setDate(instanceDate.getDate() + (i * template.recurrenceInterval));
-                  break;
-                case 'weeks':
-                  instanceDate.setDate(instanceDate.getDate() + (i * 7 * template.recurrenceInterval));
-                  break;
-                case 'months':
-                  instanceDate.setMonth(instanceDate.getMonth() + (i * template.recurrenceInterval));
-                  break;
-              }
-              break;
-          }
-
-          instances.push({
-            id: `${template.id}_${i}`,
-            templateId: template.id,
-            name: template.name,
-            description: template.description,
-            dateTime: instanceDate,
-            duration: template.duration,
-            minParticipants: template.minParticipants,
-            maxParticipants: template.maxParticipants,
-            checkIns: [],
-            recurrenceInfo: template.recurrenceType !== 'none' ? `${i + 1} of ${count}` : null
-          });
-        }
-      }
-
-      return instances;
-    }
-
-    // Check-in
-    function confirmCheckin() {
-      const event = events.find(e => e.id === currentCheckinEventId);
-      if (!event) return;
-
-      if (event.checkIns.length >= event.maxParticipants) {
-        alert('This event has reached maximum capacity');
-        return;
-      }
-
-      const name = document.getElementById('checkin-name').value.trim();
-      const identifier = checkinMode === 'anonymous' ? sessionId : name.toLowerCase();
-
-      if (checkinMode === 'named' && !name) {
-        alert('Please enter your name');
-        return;
-      }
-
-      const alreadyCheckedIn = event.checkIns.some(c =>
-        c.identifier === identifier ||
-        (checkinMode === 'named' && c.type === 'named' && c.name.toLowerCase() === name.toLowerCase())
-      );
-
-      if (alreadyCheckedIn) {
-        alert('You have already checked into this event');
-        return;
-      }
-
-      const newCheckIn = {
-        id: `checkin_${Date.now()}`,
-        identifier,
-        type: checkinMode,
-        name: checkinMode === 'named' ? name : `Anonymous #${event.checkIns.filter(c => c.type === 'anonymous').length + 1}`,
-        timestamp: new Date().toISOString()
+      const formatDate = (d) => {
+        return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
       };
 
-      event.checkIns.push(newCheckIn);
-      saveEvents();
-      renderEvents();
-      closeCheckinModal();
-    }
+      const icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'BEGIN:VEVENT',
+        `DTSTART:${formatDate(startDate)}`,
+        `DTEND:${formatDate(endDate)}`,
+        `SUMMARY:${note || 'Event'}`,
+        `DESCRIPTION:${note || ''}`,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\n');
 
-    function removeCheckIn(eventId, checkInId) {
-      const event = events.find(e => e.id === eventId);
-      if (event) {
-        event.checkIns = event.checkIns.filter(c => c.id !== checkInId);
-        saveEvents();
-        renderEvents();
-      }
-    }
+      // Clear previous QR code
+      const qrContainer = document.getElementById('qr-code');
+      qrContainer.innerHTML = '';
 
-    // Rendering
-    function formatDateTime(date) {
-      return new Intl.DateTimeFormat('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-      }).format(date);
-    }
+      // Generate new QR code
+      qrCode = new QRCode(qrContainer, {
+        text: icsContent,
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
 
-    function getEventStatus(event) {
-      const count = event.checkIns.length;
-      if (count >= event.maxParticipants) return { text: 'Full', class: 'status-full' };
-      if (count >= event.minParticipants) return { text: 'Ready', class: 'status-ready' };
-      return { text: `Need ${event.minParticipants - count} more`, class: 'status-need-more' };
-    }
-
-    function renderEvents() {
-      const container = document.getElementById('events-container');
-      const now = new Date();
-      const upcomingEvents = events.filter(e => e.dateTime >= now);
-      const pastEvents = events.filter(e => e.dateTime < now);
-
-      if (events.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <h3>No events yet</h3>
-            <p>Create your first event to get started</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-
-      if (upcomingEvents.length > 0) {
-        html += `
-          <section>
-            <h2 class="section-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              Upcoming Events
-            </h2>
-            <div class="events-list">
-        `;
-
-        upcomingEvents.forEach(event => {
-          const status = getEventStatus(event);
-          const isFull = event.checkIns.length >= event.maxParticipants;
-
-          html += `
-            <div class="event-card">
-              <div class="event-card-body">
-                <div class="event-main">
-                  <div class="event-info">
-                    <h3>${escapeHtml(event.name)}</h3>
-                    <p class="event-datetime">${formatDateTime(event.dateTime)} • ${event.duration} min</p>
-                    ${event.recurrenceInfo ? `
-                      <span class="event-recurrence">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="17 1 21 5 17 9"></polyline>
-                          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                          <polyline points="7 23 3 19 7 15"></polyline>
-                          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                        </svg>
-                        Event ${event.recurrenceInfo}
-                      </span>
-                    ` : ''}
-                  </div>
-                  <div class="event-actions">
-                    <div class="event-capacity">
-                      <div class="capacity-count">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="9" cy="7" r="4"></circle>
-                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        ${event.checkIns.length}/${event.maxParticipants}
-                      </div>
-                      <span class="status-badge ${status.class}">${status.text}</span>
-                    </div>
-                    <button class="btn btn-primary" onclick="openCheckinModal('${event.id}')" ${isFull ? 'disabled' : ''}>
-                      Check In
-                    </button>
-                  </div>
-                </div>
-                ${event.checkIns.length > 0 ? `
-                  <div class="attendees">
-                    <p class="attendees-label">Checked In</p>
-                    <div class="attendees-list">
-                      ${event.checkIns.map(c => `
-                        <span class="attendee-tag">
-                          ${c.type === 'anonymous' ? `
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="8.5" cy="7" r="4"></circle>
-                              <line x1="18" y1="8" x2="23" y2="13"></line>
-                              <line x1="23" y1="8" x2="18" y2="13"></line>
-                            </svg>
-                          ` : `
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                          `}
-                          ${escapeHtml(c.name)}
-                          <button class="attendee-remove" onclick="removeCheckIn('${event.id}', '${c.id}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18"></line>
-                              <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                          </button>
-                        </span>
-                      `).join('')}
-                    </div>
-                  </div>
-                ` : ''}
-              </div>
-            </div>
-          `;
-        });
-
-        html += '</div></section>';
-      }
-
-      if (pastEvents.length > 0) {
-        html += `
-          <section class="past-events">
-            <h2 class="section-title">Past Events</h2>
-            <div class="events-list">
-        `;
-
-        pastEvents.slice(0, 5).forEach(event => {
-          html += `
-            <div class="past-event-card">
-              <div class="past-event-info">
-                <h3>${escapeHtml(event.name)}</h3>
-                <p>${formatDateTime(event.dateTime)}</p>
-              </div>
-              <span class="past-event-attendance">${event.checkIns.length} attended</span>
-            </div>
-          `;
-        });
-
-        html += '</div></section>';
-      }
-
-      container.innerHTML = html;
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    // Handle Enter key in check-in name field
-    document.getElementById('checkin-name').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        confirmCheckin();
-      }
+      document.getElementById('qr-container').style.display = 'block';
     });
-
-    // Update recurrence preview when values change
-    document.getElementById('event-count').addEventListener('input', updateRecurrencePreview);
-    document.getElementById('event-interval').addEventListener('input', updateRecurrencePreview);
-    document.getElementById('interval-unit').addEventListener('change', updateRecurrencePreview);
-    document.querySelectorAll('#weekday-select input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', updateRecurrencePreview);
-    });
-
-    // Initialize
-    loadEvents();
   </script>
 </body>
 </html>
